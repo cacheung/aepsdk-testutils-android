@@ -1,0 +1,16 @@
+# DSStore
+.DS_Store
+
+# Generated files
+bin/
+build/
+ci/
+jacoco.exec
+local.properties
+
+# IntelliJ
+*.iml
+**/.idea/
+
+# VSCode
+.VSCode
