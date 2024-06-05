@@ -107,6 +107,7 @@ public class TestHelper {
 						clearAllDatastores();
 						resetTestExpectations();
 						resetServiceProvider();
+						TestPersistenceHelper.resetKnownPersistence();
 					}
 				}
 			};
