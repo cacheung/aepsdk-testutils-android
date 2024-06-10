@@ -22,10 +22,12 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.test.platform.app.InstrumentationRegistry;
 import com.adobe.marketing.mobile.AdobeCallbackWithError;
 import com.adobe.marketing.mobile.AdobeError;
 import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.Extension;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.MobileCoreHelper;
@@ -56,6 +58,8 @@ public class TestHelper {
 
 	// List of threads to wait for after test execution
 	private static final List<String> sdkThreadPrefixes = new ArrayList<>();
+
+	private static final long REGISTRATION_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(2);
 
 	static {
 		sdkThreadPrefixes.add("pool"); // used for threads that execute the listeners code
@@ -112,6 +116,31 @@ public class TestHelper {
 				}
 			};
 		}
+	}
+
+	/**
+	 * Applies the configuration provided, registers the extensions and then starts core.
+	 *
+	 * @param extensions the extensions that need to be registered
+	 * @param configuration the initial configuration update that needs to be applied
+	 */
+	public static void registerExtensions(
+			final List<Class<? extends Extension>> extensions,
+			@Nullable final Map<String, Object> configuration
+	) {
+		if (configuration != null) {
+			MobileCore.updateConfiguration(configuration);
+		}
+
+		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
+		MobileCore.registerExtensions(extensions, o -> latch.countDown());
+
+		try {
+			latch.await(REGISTRATION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			fail("Failed to register extensions");
+		}
+		TestHelper.waitForThreads(2000);
 	}
 
 	/**
