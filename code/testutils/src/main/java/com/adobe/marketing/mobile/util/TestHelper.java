@@ -21,6 +21,7 @@ import android.app.Application;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -37,6 +38,7 @@ import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.ServiceProviderHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -126,6 +128,8 @@ public class TestHelper {
 	 *
 	 * Warning: If a custom network service is registered with the {@link ServiceProvider} to be
 	 * used in the test case, it must be set again after calling this method.
+	 *
+	 * Warning: Call setupCoreRule() before calling this method.
 	 *
 	 * Note: This method does not clear shared preferences, the application cache directory,
 	 * or the database directory.
@@ -640,6 +644,9 @@ public class TestHelper {
 		public CustomApplication() {}
 	}
 
+	/**
+	 * Call setupCoreRule() before calling this method.
+	 */
 	private static void clearAllDatastores() {
 		final List<String> knownDatastores = new ArrayList<String>() {
 			{
@@ -649,7 +656,7 @@ public class TestHelper {
 				add("AdobeMobile_ConfigState");
 			}
 		};
-		final Application application = TestHelper.defaultApplication;
+		final Application application = defaultApplication;
 
 		if (application == null) {
 			fail("TestHelper - Unable to clear datastores. Application is null, fast failing the test case.");
@@ -682,5 +689,23 @@ public class TestHelper {
 		ServiceProviderHelper.cleanCacheDir();
 		ServiceProviderHelper.cleanDatabaseDir();
 		ServiceProviderHelper.resetServices();
+	}
+
+	/**
+	 * Get bundled file from Assets folder as {@code InputStream}.
+	 * Asset folder location "src/androidTest/assets/".
+	 * Call setupCoreRule() before calling this method.
+	 * @param filename file name of the asset
+	 * @return an {@code InputStream} to the file asset, or null if the file could not be opened or
+	 * no Application is set.
+	 * @throws IOException
+	 */
+	public static InputStream getAsset(final String filename) throws IOException {
+		if (defaultApplication == null) {
+			return null;
+		}
+
+		AssetManager assetManager = defaultApplication.getApplicationContext().getAssets();
+		return assetManager.open(filename);
 	}
 }
