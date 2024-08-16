@@ -264,11 +264,7 @@ String expected = "{ \"type\": \"edge\"}"; // Notice only defining expected vali
 assertExactMatch(
 expected,
 event,
-new ElementCount(2, Subtree) // Element count with 2 total properties in the entire JSON 
-    //????
-    // The combination of: 
-    // 1. Default `paths` = `nil` -> root of the JSON, AND
-    // 2. `scope` = `Subtree` -> this node and everything under it
+new ElementCount(2, Subtree) // Element count with 2 total properties in the entire JSON, `Subtree` refers to this node and everything under it
 );
 ```
 
